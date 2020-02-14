@@ -1,0 +1,12 @@
+[package]
+name = "kitcat"
+version = "1.0.0"
+authors = ["Philipp Kopf"]
+edition = "2018"
+
+[dependencies]
+walkdir = "2.3.1"
+regex = "1"
+rust-ini = "0.15"
+log = "0.4"
+stderrlog = "0.4.3"
