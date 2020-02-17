@@ -94,7 +94,7 @@ pub fn process_dataset(dataset: Vec<String>, rcon: &RuntimeConfig) -> HashMap<St
 	let _output_rule = &ruleset.output;// just a string
 	let recheck_rule = Regex::new(&ruleset.recheck).unwrap();// compile here, not in loop
 
-	info!("Applying input-rule {:?} on {:?}", input_rule, rcon.path);
+	info!("Applying input-rule {:?} on {:?}", input_rule, rcon.input_path);
 	info!("Found {:?} paths - processing...", dataset.len());
 
 	for path in dataset
@@ -138,19 +138,11 @@ pub fn process_dataset(dataset: Vec<String>, rcon: &RuntimeConfig) -> HashMap<St
 
 pub fn process_capture(cap: Captures, rcon: &RuntimeConfig, ruleset: &Ruleset, recheck_rule: &Regex) -> Sample
 {
-	let mut _path = rcon.path.to_string();
-	let last: char = *_path.chars().rev().take(1).collect::<Vec<char>>().get(0).unwrap();
+	let mut _path = rcon.input_path.to_string();
+	let mut _target_pre = rcon.output_path.to_string();
 
-	if last == '/' || last == '\\'
-	{
-		debug!("Trimming trailing slash of {:?}", _path);
-		_path = _path.get(0..(_path.len() - 1)).unwrap().to_string();
-	}
-
-	let mut _target_pre = rcon.name.replace("*", &_path);
-	_target_pre.push_str(&["/", &ruleset.output].join(""));
-
-	_path.push_str(&["/", &cap[0]].join(""));
+	_path.push_str(&cap[0]);
+	_target_pre.push_str(&ruleset.output);
 
 	debug!("Mapping {:?} by order {:?}", cap, ruleset.input_order);
 
@@ -182,7 +174,7 @@ pub fn process_capture(cap: Captures, rcon: &RuntimeConfig, ruleset: &Ruleset, r
 
 	Sample {
 		source_path: _path,
-		target_path: _target_pre,
+		target_path: _target_pre.to_string(),
 		fields: matched_groups
 	}
 }

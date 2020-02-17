@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 extern crate stderrlog;
 extern crate log;
 	use log::*;
@@ -16,7 +19,13 @@ fn main()
 	init_logger(&rc);
 	info!("Using {:?}", rc);
 
-    let samples = catalog::collect(&rc.path);
+	if rc.help
+	{
+		runtimeconfig::print_help();
+		return;
+	}
+
+    let samples = catalog::collect(&rc.input_path);
     let mut kits: HashMap<String, Kit> = catalog::process_dataset(samples, &rc);
 
     catalog::apply_filters(&mut kits, &rc);

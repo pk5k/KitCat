@@ -1,7 +1,9 @@
+extern crate lazy_static;
+
 extern crate stderrlog;
 extern crate log;
 	use log::*;
-	
+
 extern crate regex;
 	use regex::*;
 
@@ -35,6 +37,22 @@ const DEF_RULE_VARIATION: &str = r"([a-zA-Z0-9 ]*)";
 const DEF_RULE_EXTENSION: &str = r"([wav|WAV|mp3|MP3]*)";
 const DEF_RULE_INDEX: &str = PH_KIT;
 const DEF_RULE_RECHECK: &str = r"^([0-9a-zA-Z]{1,2})$";
+
+// Helpers to keep the path clean: 
+const DEF_RULE_TRIMMER_DOTS: &str = r"[ ]?\.[ ]?";
+const DEF_RULE_TRIMMER_DOTS_TO: &str = r".";
+
+const DEF_RULE_TRIMMER_SLASH: &str = r"[ ]?/[ ]?";
+const DEF_RULE_TRIMMER_SLASH_TO: &str = r"/";
+
+const DEF_RULE_TRIMMER_BACKSLASH: &str = r"[ ]?\[ ]?";
+const DEF_RULE_TRIMMER_BACKSLASH_TO: &str = r"\";
+
+lazy_static! {
+	static ref TRIMMER_REGEX_DOTS: Regex = Regex::new(DEF_RULE_TRIMMER_DOTS).unwrap();
+	static ref TRIMMER_REGEX_SLASH: Regex = Regex::new(DEF_RULE_TRIMMER_SLASH).unwrap();
+	static ref TRIMMER_REGEX_BACKSLASH: Regex = Regex::new(DEF_RULE_TRIMMER_BACKSLASH).unwrap();
+}
 
 impl std::fmt::Debug for Ruleset
 {
@@ -90,14 +108,9 @@ pub fn apply_output_rule(to_str: &mut String, replacements: &HashMap<String, Str
 		*to_str = to_str.trim().replace(&with_brackets(group), replacement.trim());
 	}
 
-	// TODO als regex
-	*to_str = to_str
-	.replace(" .", ".")
-	.replace(" /", "/")
-	.replace(" \\", "\\")
-	.replace(". ", ".")
-	.replace("/ ", "/")
-	.replace("\\ ", "\\"); // little helpers for filename correction
+	*to_str = TRIMMER_REGEX_DOTS.replace_all(to_str, DEF_RULE_TRIMMER_DOTS_TO).to_string();
+	*to_str = TRIMMER_REGEX_SLASH.replace_all(to_str, DEF_RULE_TRIMMER_SLASH_TO).to_string();
+	*to_str = TRIMMER_REGEX_BACKSLASH.replace_all(to_str, DEF_RULE_TRIMMER_BACKSLASH_TO).to_string();
 }
 
 pub fn apply_input_groups(to_str: &mut String, replacements: &HashMap<String, String>)
@@ -106,12 +119,12 @@ pub fn apply_input_groups(to_str: &mut String, replacements: &HashMap<String, St
 	{
 		*to_str = to_str.replace(&with_brackets(group), replacement);
 	}
-} 
+}
 
 pub fn setup_default_ruleset() -> Ruleset
 {
 	let raw_input_str = &[&with_brackets(PH_GROUP), "/", &with_brackets(PH_SAMPLE), " ?", &with_brackets(PH_KIT), &with_brackets(PH_VARIATION), r"?\.", &with_brackets(PH_EXTENSION)].join("");
-	let raw_output_str = &[&with_brackets(PH_KIT), &with_brackets(PH_SAMPLE), " ", &with_brackets(PH_VARIATION)].join("");
+	let raw_output_str = &[&with_brackets(PH_KIT), "/", &with_brackets(PH_SAMPLE), " ", &with_brackets(PH_VARIATION), ".", &with_brackets(PH_EXTENSION)].join("");
 	let recheck_rule = DEF_RULE_RECHECK;
 	let index_rule = DEF_RULE_INDEX;
 	let mut groups: HashMap<String, String> = HashMap::new();
