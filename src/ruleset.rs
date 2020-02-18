@@ -114,10 +114,10 @@ pub fn apply_input_groups(to_str: &mut String, replacements: &HashMap<String, St
 pub fn setup_default_ruleset() -> Ruleset
 {	
 	#[cfg(target_family = "unix")]
-		let os_dir_del = "/";
+		let os_dir_del = r"/";
 
 	#[cfg(target_family = "windows")]
-		let os_dir_del = "\\";
+		let os_dir_del = r"\\";// escape is for regex
 	
 	let raw_input_str = &[&with_brackets(PH_GROUP), os_dir_del, &with_brackets(PH_SAMPLE), " ?", &with_brackets(PH_KIT), &with_brackets(PH_VARIATION), r"?\.", &with_brackets(PH_EXTENSION)].join("");
 	let raw_output_str = &[&with_brackets(PH_KIT), os_dir_del, &with_brackets(PH_SAMPLE), " ", &with_brackets(PH_VARIATION), ".", &with_brackets(PH_EXTENSION)].join("");
