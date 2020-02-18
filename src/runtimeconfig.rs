@@ -203,7 +203,7 @@ fn process_token(token: &str, config: &mut RuntimeConfig, buffer: &Vec<String>)
 
 pub fn print_help()
 {
-	println!("KITCAT {:?} - Help", version::APP_VERSION);
+	println!("KITCAT {:} - Help", version::APP_VERSION);
 	println!("");
 	println!("OPTIONS");
 	println!("");
