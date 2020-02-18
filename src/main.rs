@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate lazy_static;
-
 extern crate stderrlog;
 extern crate log;
 	use log::*;
@@ -8,6 +7,7 @@ extern crate log;
 mod ruleset;
 mod runtimeconfig;
 mod catalog;
+mod version;
 
 use std::collections::*;
 use crate::catalog::Kit;
@@ -19,12 +19,17 @@ fn main()
 	init_logger(&rc);
 	info!("Using {:?}", rc);
 
-	if rc.help
+	if rc.help || rc.input.is_empty()
 	{
+		if rc.input.is_empty()
+		{
+			warn!("KitCat was started without any argument (at least -input is required) - help will be shown");
+		}
+
 		runtimeconfig::print_help();
 		return;
 	}
-	
+
     let samples = catalog::collect(&rc.input);
     let mut kits: HashMap<String, Kit> = catalog::process_dataset(samples, &rc);
 

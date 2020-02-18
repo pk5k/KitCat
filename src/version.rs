@@ -1,0 +1,1 @@
+pub const APP_VERSION: &str = r"1.0.0";

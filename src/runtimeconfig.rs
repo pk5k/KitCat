@@ -1,10 +1,11 @@
 use std::path::Path;
+use std::env;
+
+use crate::version;
+
 extern crate stderrlog;
 extern crate log;
 	use log::*;
-
-
-use std::env;
 
 pub struct RuntimeConfig
 {
@@ -65,7 +66,7 @@ fn setup_default_config() -> RuntimeConfig
 		kits: vec![], 
 		trunc: 0, // <-- 0 = no truncating
 		rules: String::from(""),
-		input: add_trailing_slash(&to_absolute_path(".")),
+		input: String::from(""),
 		output: String::from("*_remapped")
 	}
 }
@@ -77,7 +78,11 @@ fn add_trailing_slash(to: &str) -> String
 
 	if last != '/' && last != '\\'
 	{
-		out.push_str("/");
+		#[cfg(target_family = "unix")]
+			out.push_str("/");
+
+		#[cfg(target_family = "windows")]
+			out.push_str("\\");
 	}
 
 	out.to_string()
@@ -85,24 +90,35 @@ fn add_trailing_slash(to: &str) -> String
 
 fn to_absolute_path(path: &str) -> String
 {
+	println!("{:?}", path.is_empty());
+	if path.is_empty()
+	{
+		return path.to_string();
+	}
+
 	// also this will fail if the path does not exist
 	let pb = std::path::PathBuf::from(path); 
 	pb.canonicalize().unwrap().as_path().to_str().unwrap().to_string()
+	.replace("\\\\?\\", "") // windows special quirks https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#fully-qualified-vs-relative-paths
 }
 
 pub fn from_args() -> RuntimeConfig
 {
 	let args: Vec<String> = env::args().collect();
 	let mut out = process_args(args);
-
 	out.output = add_trailing_slash(&target_name(&out.output, &out.input));
 	out
 }
 
 fn target_name(output_path: &String, input_path: &str) -> String
 {
+	if input_path.is_empty()// can't use
+	{
+		return output_path.to_string();
+	}
+
 	let source_path = Path::new(&input_path);
-	let name = source_path.file_name().unwrap().to_string_lossy(); // Name of the working-directory
+	let name = source_path.file_name().unwrap().to_string_lossy().replace("/", ""); // Name of the working-directory and strip all occurences of / for windoze
 	let output_path_out = output_path.replace("*", &name); // * (if given) will be replaced with the name of the working-directory
 
 	output_path_out.to_string()
@@ -113,6 +129,11 @@ fn process_args(args: Vec<String>) -> RuntimeConfig
 	let mut out = setup_default_config();
 	let mut buffer: Vec<String> = vec![];
 	let mut proc_token = "";
+
+	if args.len() == 1 // first argument is always set (= name of this binary)
+	{
+		return out;
+	}
 
 	for (i, elem) in args.iter().enumerate()
 	{
@@ -182,7 +203,7 @@ fn process_token(token: &str, config: &mut RuntimeConfig, buffer: &Vec<String>)
 
 pub fn print_help()
 {
-	println!("KITCAT - Help");
+	println!("KITCAT {:?} - Help", version::APP_VERSION);
 	println!("");
 	println!("OPTIONS");
 	println!("");
