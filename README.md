@@ -1,11 +1,8 @@
 ![logo](https://repository-images.githubusercontent.com/240513735/fed78c00-4f48-11ea-87c0-1d82d3cd57fa)
 
-Command-line tool designed to catalog audio sample libraries.
+Command-line tool designed to catalog audio sample libraries ([and more](#custom-ruleset-definition)).
 
-> This project was made to gain first experiences in the rust programming-language.
-	
 # KitCat
----
 
 ## Example
 
@@ -65,11 +62,11 @@ Command-line tool designed to catalog audio sample libraries.
 			
 
 ## Runtime configuration
-Arguments that can be passed to the kitcat-binary. All arguments must be prefixed with a dash "-" followed by the parameter(-short)-name.
+Arguments that can be passed to the KitCat-binary. All arguments must be prefixed with a dash "-" followed by the parameter(-short)-name.
 
 |parameter|short|description|
 |:-------|:---:|:----------|
-| input   | i   | input-directory - all files inside this directory will be checked against the input-rule (without the leading input-directory-path; default is the directory of the kitcat-binary (.) ) . |
+| input   | i   | input-directory - all files inside this directory will be checked against the input-rule (without the leading input-directory-path). This argument is required; if not set, the KitCat-help will be displayed instead. |
 | output 	| o  | output-directory - files will be written into this directory (use an asterisk (*) to use the input-directories base-name; default is \*_remapped) |
 | soft 	| s 	 | Create soft-link instead of hard-link |
 | copy 	| c 	 | Copy files instead of linking (if set: -s won’t be used) |
@@ -81,9 +78,13 @@ Arguments that can be passed to the kitcat-binary. All arguments must be prefixe
 | help | h | Print list of possible arguments |
 
 ## Custom ruleset definition
-Add the lines below to an ini-file of your choice and pass it's path to the "-r" argument explained above. KitCat will use the rules defined inside this file instead of using the internal default-ruleset. Check the examples-directory for further explanation of the configuration file.
+Add the lines below (of the OS you're using) to an ini-file of your choice and pass it's path to the "-rules" argument explained above. KitCat will use the rules defined inside this file instead of using the internal default-ruleset. Check the examples-directory for further explanation of the configuration file.
 
-	input = "{group}/{sample} ?{kit}{variation}?\.{extension}"
+### Unix
+
+Uses `/` as directory-separator - no escaping required.
+
+	input = "{group}/{sample} ?{kit}{variation}?\\.{extension}"
 	output = "{kit}/{sample} {variation}.{extension}"
 	recheck = "^([[0-9a-zA-Z]{1,2}])$"
 	index = kit
@@ -97,3 +98,22 @@ Add the lines below to an ini-file of your choice and pass it's path to the "-r"
 	
 	[rearrange]
 	kit = "{sample} - {group}/{kit}_"
+
+### Windows
+
+Uses `\` as directory-separator. **NOTICE**: The backslash of the input-rule is double-escaped, because this value is passed to a regex-parser after reading the configuration file.
+
+	input = "{group}\\\\{sample} ?{kit}{variation}?\\.{extension}"
+	output = "{kit}\\{sample} {variation}.{extension}"
+	recheck = "^([[0-9a-zA-Z]{1,2}])$"
+	index = kit
+	
+	[groups]
+	group = "([a-zA-Z0-9 ]*)"
+	sample = "([a-zA-Z0-9]*)"
+	kit = "([a-zA-Z0-9]*)"
+	variation = "([a-zA-Z0-9 ]*)"
+	extension = "([(wav|WAV|mp3|MP3)]*)"
+	
+	[rearrange]
+	kit = "{sample} - {group}\\{kit}_"
