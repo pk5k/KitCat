@@ -74,7 +74,7 @@ Arguments that can be passed to the kitcat-binary. All arguments must be prefixe
 | soft 	| s 	 | Create soft-link instead of hard-link |
 | copy 	| c 	 | Copy files instead of linking (if set: -s won’t be used) |
 | truncate | t | truncate all kits containing less than „-t“ samples |
-| kits 	| k 	 | Space-separated list of names. Just process this kits(s). The name check is done by the configured group-index. |
+| kits 	| k 	 | Space-separated list of names. Just process this kit(s). The name check is done by the configured group-index. |
 | verbose | v | Print more information to the stdout while processing |
 | dry 	| d  | no files will be written at all |
 | rules | r | Path to a ini-file, overriding the internal ruleset (explained in "custom ruleset definition" section below) |

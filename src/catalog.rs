@@ -94,7 +94,7 @@ pub fn process_dataset(dataset: Vec<String>, rcon: &RuntimeConfig) -> HashMap<St
 	let _output_rule = &ruleset.output;// just a string
 	let recheck_rule = Regex::new(&ruleset.recheck).unwrap();// compile here, not in loop
 
-	info!("Applying input-rule {:?} on {:?}", input_rule, rcon.input_path);
+	info!("Applying input-rule {:?} on {:?}", input_rule, rcon.input);
 	info!("Found {:?} paths - processing...", dataset.len());
 
 	for path in dataset
@@ -138,8 +138,8 @@ pub fn process_dataset(dataset: Vec<String>, rcon: &RuntimeConfig) -> HashMap<St
 
 pub fn process_capture(cap: Captures, rcon: &RuntimeConfig, ruleset: &Ruleset, recheck_rule: &Regex) -> Sample
 {
-	let mut _path = rcon.input_path.to_string();
-	let mut _target_pre = rcon.output_path.to_string();
+	let mut _path = rcon.input.to_string();
+	let mut _target_pre = rcon.output.to_string();
 
 	_path.push_str(&cap[0]);
 	_target_pre.push_str(&ruleset.output);

@@ -24,8 +24,8 @@ fn main()
 		runtimeconfig::print_help();
 		return;
 	}
-
-    let samples = catalog::collect(&rc.input_path);
+	
+    let samples = catalog::collect(&rc.input);
     let mut kits: HashMap<String, Kit> = catalog::process_dataset(samples, &rc);
 
     catalog::apply_filters(&mut kits, &rc);

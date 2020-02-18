@@ -39,19 +39,11 @@ const DEF_RULE_INDEX: &str = PH_KIT;
 const DEF_RULE_RECHECK: &str = r"^([0-9a-zA-Z]{1,2})$";
 
 // Helpers to keep the path clean: 
-const DEF_RULE_TRIMMER_DOTS: &str = r"[ ]?\.[ ]?";
-const DEF_RULE_TRIMMER_DOTS_TO: &str = r".";
-
-const DEF_RULE_TRIMMER_SLASH: &str = r"[ ]?/[ ]?";
-const DEF_RULE_TRIMMER_SLASH_TO: &str = r"/";
-
-const DEF_RULE_TRIMMER_BACKSLASH: &str = r"[ ]?\[ ]?";
-const DEF_RULE_TRIMMER_BACKSLASH_TO: &str = r"\";
+const DEF_RULE_TRIMMER: &str = r"[ ]?([\|/|.])[ ]?";
+const DEF_RULE_TRIMMER_TO: &str = r"$1";
 
 lazy_static! {
-	static ref TRIMMER_REGEX_DOTS: Regex = Regex::new(DEF_RULE_TRIMMER_DOTS).unwrap();
-	static ref TRIMMER_REGEX_SLASH: Regex = Regex::new(DEF_RULE_TRIMMER_SLASH).unwrap();
-	static ref TRIMMER_REGEX_BACKSLASH: Regex = Regex::new(DEF_RULE_TRIMMER_BACKSLASH).unwrap();
+	static ref TRIMMER_REGEX: Regex = Regex::new(DEF_RULE_TRIMMER).unwrap();
 }
 
 impl std::fmt::Debug for Ruleset
@@ -108,9 +100,7 @@ pub fn apply_output_rule(to_str: &mut String, replacements: &HashMap<String, Str
 		*to_str = to_str.trim().replace(&with_brackets(group), replacement.trim());
 	}
 
-	*to_str = TRIMMER_REGEX_DOTS.replace_all(to_str, DEF_RULE_TRIMMER_DOTS_TO).to_string();
-	*to_str = TRIMMER_REGEX_SLASH.replace_all(to_str, DEF_RULE_TRIMMER_SLASH_TO).to_string();
-	*to_str = TRIMMER_REGEX_BACKSLASH.replace_all(to_str, DEF_RULE_TRIMMER_BACKSLASH_TO).to_string();
+	*to_str = TRIMMER_REGEX.replace_all(to_str, DEF_RULE_TRIMMER_TO).to_string();
 }
 
 pub fn apply_input_groups(to_str: &mut String, replacements: &HashMap<String, String>)

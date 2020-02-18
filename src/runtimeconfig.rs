@@ -17,8 +17,8 @@ pub struct RuntimeConfig
 	pub kits: Vec<String>, // -k
 	pub trunc: u8, // -t
 	pub rules: String, // -r
-	pub input_path: String,// -i
-	pub output_path: String // -o
+	pub input: String,// -i
+	pub output: String // -o
 }
 
 impl std::fmt::Debug for RuntimeConfig
@@ -33,8 +33,8 @@ impl std::fmt::Debug for RuntimeConfig
     		self.kits,
     		self.trunc,
     		self.rules,
-    		self.input_path,
-    		self.output_path
+    		self.input,
+    		self.output
 		)
 	}
 }
@@ -65,8 +65,8 @@ fn setup_default_config() -> RuntimeConfig
 		kits: vec![], 
 		trunc: 0, // <-- 0 = no truncating
 		rules: String::from(""),
-		input_path: add_trailing_slash(&to_absolute_path(".")),
-		output_path: String::from("*_remapped")
+		input: add_trailing_slash(&to_absolute_path(".")),
+		output: String::from("*_remapped")
 	}
 }
 
@@ -95,7 +95,7 @@ pub fn from_args() -> RuntimeConfig
 	let args: Vec<String> = env::args().collect();
 	let mut out = process_args(args);
 
-	out.output_path = add_trailing_slash(&target_name(&out.output_path, &out.input_path));
+	out.output = add_trailing_slash(&target_name(&out.output, &out.input));
 	out
 }
 
@@ -104,6 +104,7 @@ fn target_name(output_path: &String, input_path: &str) -> String
 	let source_path = Path::new(&input_path);
 	let name = source_path.file_name().unwrap().to_string_lossy(); // Name of the working-directory
 	let output_path_out = output_path.replace("*", &name); // * (if given) will be replaced with the name of the working-directory
+
 	output_path_out.to_string()
 }
 
@@ -170,8 +171,8 @@ fn process_token(token: &str, config: &mut RuntimeConfig, buffer: &Vec<String>)
 		T_KITS => config.kits = read_buffer(&token, &buffer, 1),
 		T_TRUNC => config.trunc = read_buffer(&token, &buffer, 1).get(0).unwrap().parse::<u8>().unwrap(),
 		T_RULES => config.rules = String::from(read_buffer(&token, &buffer, 1).get(0).unwrap()),
-		T_OUTPUT => config.output_path = String::from(read_buffer(&token, &buffer, 1).get(0).unwrap()),
-		T_INPUT => config.input_path = add_trailing_slash(&to_absolute_path(read_buffer(&token, &buffer, 1).get(0).unwrap())),
+		T_OUTPUT => config.output = String::from(read_buffer(&token, &buffer, 1).get(0).unwrap()),
+		T_INPUT => config.input = add_trailing_slash(&to_absolute_path(read_buffer(&token, &buffer, 1).get(0).unwrap())),
 		T_HELP => config.help = true,
 		_ => { 
 				warn!("Unknown token {:?}", token)
